@@ -1,0 +1,158 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+typedef struct node {
+	int value;
+	struct node *left, *right;
+}node;
+
+
+// functie creare nod
+node* creareNod(int val)
+{
+	node *aux = malloc(sizeof(node));
+	aux->value = val;
+	aux->left = NULL;
+	aux->right = NULL;
+
+	return aux;
+}
+
+
+// functie cautare nod
+node* cautare(node* radacina, int valoare)
+{
+    if (radacina == NULL || radacina->value == val)
+       return radacina;
+    
+    if (radacina->value < val)
+       return cautare(radacina->right, val);
+ 
+    return cautare(radacina->left, val);
+}
+
+// functie inserare nod in arbore
+
+node* inserareNod(node* radacina, int val)
+{
+	if (radacina == NULL) {
+		radacina = creareNod(val);
+		return radacina;
+	}
+
+	if (val < radacina->value) {
+		return inserareNod(radacina->left, val);
+	}
+	else 
+		if (val > radacina->value) {
+			return inserareNod(radacina->right, val);
+		}
+
+	return radacina;
+}
+
+
+// cautarea nodului cu valoare minima
+node * nodCuValoareMinima(node* radacina)
+{
+	node* curent = radacina;
+
+	while (curent && curent->left != NULL)
+	curent = curent->left;
+
+	return curent;
+}
+
+
+// stergerea unui nod din arbore
+node* stergereNod(node* radacina, int val)
+{
+	if (radacina == NULL) 
+		return radacina;
+
+
+	if (val < radacina->value)
+		radacina->left = stergereNod(radacina->left, val);
+	else 
+		if (val > radacina->value)
+		radacina->right = stergereNod(radacina->right, val);
+		//daca radacina are valuea pe care o cautam
+		else {
+			if (radacina->left == NULL) {
+				node *aux = radacina->right;
+				free(radacina);
+				return aux;
+			}
+			else 
+				if (radacina->right == NULL) {
+					node *aux = radacina->left;
+					free(radacina);
+					return aux;
+				}
+
+				// nod cu copil in partea left, cat si la right.
+				// Caut elementul din subarborele drept care are cea mai mica value
+				node* aux = nodCuValoareMinima(radacina->right);
+				radacina->value = aux->value;
+				return stergereNod(radacina->right, aux->value);
+			}
+
+	return radacina;
+}
+
+int esteBinarDeCautare(node* radacina)
+{
+	// e gol, deci teoretic da
+	if (radacina == NULL)
+		return 1;
+
+	// daca valoarea din dreapta este mai mica decat a radacinii:
+	if (radacina->right != NULL && (radacina->right->value < radacina->value))
+		return 0;
+
+	// daca valoarea din stanga este mai mare decat a radacinii:
+	if (radacina->left != NULL && (radacina->left->value > radacina->value))
+		return 0;
+
+	// verific recursiv si pentru restul nodurilor pe stanga:
+	if (esteBinarDeCautare(radacina->left) == 0)
+		return 0;
+
+	// verific recursiv si pentru restul nodurilor pe dreapta:
+	if (esteBinarDeCautare(radacina->right) == 0)
+		return 0;
+
+	return 1;
+}
+
+int main()
+{
+	FILE *fin;
+	int nrNoduri;
+	int *valori;
+	int i;
+	node* root = NULL;
+
+    fin = fopen("input.txt", "r");
+
+    // citesc numarul de noduri din arbore:
+    fscanf(fin, "%d", &nrNoduri);
+
+    // aloc memorie pentru vectorul de valori ale nodurilor:
+    valori = (int *)malloc(nrNoduri * sizeof(int));
+
+
+    for (i = 0; i < nrNoduri; i++) {
+        fscanf(fin, "%d", &valori[i]);
+    }
+
+    for (i = 0; i < nrNoduri; i++) {
+    	inserareNod(root, valori[i]);
+    }
+
+
+    free(valori);
+    fclose(fin);
+    return 0;
+}
